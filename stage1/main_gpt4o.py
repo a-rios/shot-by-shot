@@ -10,10 +10,9 @@ from tqdm import tqdm
 
 from utils import output_cleaning
 from promptloader import PromptLoader
-from dataloader import CMDAD_Dataset, TVAD_Dataset, MADEval_Dataset
+from dataloader import CMDAD_Dataset, TVAD_Dataset, MADEval_Dataset, SwissAD_Dataset
 
 from openai import OpenAI
-os.environ["OPENAI_API_KEY"] = #TODO
 
 
 def main(args):
@@ -34,6 +33,9 @@ def main(args):
         D = MADEval_Dataset
         video_type = "movie"
         args.num_workers = 8
+    elif args.dataset == "swissAD":
+        D = SwissAD_Dataset
+        video_type = "movie"
     else:
         print("Check dataset name")
         sys.exit()

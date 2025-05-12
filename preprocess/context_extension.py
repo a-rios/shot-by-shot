@@ -85,8 +85,6 @@ if __name__ == "__main__":
     Output: Shot structures (including context shots) for all AD clips
     '''
 
-    args.dataset = "tvad"
-
     if args.dataset == "tvad": # multiple the range in second to obtain the range in frames (for 3fps images)
         args.internal_range = int(args.internal_range * 3)
         args.external_range = int(args.external_range * 3)
@@ -112,6 +110,10 @@ if __name__ == "__main__":
             ad_start = min(ast.literal_eval(anno_df_row["tvad_index"]))
             ad_end = max(ast.literal_eval(anno_df_row["tvad_index"]))
             shot_df_single = shot_df[shot_df["tvad_name"] == anno_df_row["tvad_name"]]
+        elif args.dataset == "swissAD":
+            ad_start = anno_df_row["start"]
+            ad_end = anno_df_row["end"]
+            shot_df_single = shot_df[shot_df["name"] == anno_df_row["movie_title"]]
         else:
             print("Please specify the dataset")
 

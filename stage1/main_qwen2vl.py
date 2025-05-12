@@ -1,5 +1,5 @@
 import os
-os.environ['TRANSFORMERS_CACHE'] = #TODO
+#os.environ['TRANSFORMERS_CACHE'] = #TODO
 import ast
 import sys
 import torch
@@ -10,7 +10,7 @@ import pandas as pd
 from tqdm import tqdm
 
 from promptloader import PromptLoader
-from dataloader import CMDAD_Dataset, TVAD_Dataset, MADEval_Dataset
+from dataloader import CMDAD_Dataset, TVAD_Dataset, MADEval_Dataset, SwissAD_Dataset
 from transformers import Qwen2VLForConditionalGeneration, AutoTokenizer, AutoProcessor
 
 
@@ -18,7 +18,8 @@ def main(args):
     # Load model
     processor = AutoProcessor.from_pretrained("Qwen/Qwen2-VL-7B-Instruct")
     model = Qwen2VLForConditionalGeneration.from_pretrained(
-        "Qwen/Qwen2-VL-7B-Instruct", torch_dtype="auto", device_map="auto"
+        "Qwen/Qwen2-VL-7B-Instruct", torch_dtype=torch.bfloat16, device_map="auto",
+      attn_implementation="flash_attention_2"
     )
     
     # Build dataloader
@@ -32,6 +33,9 @@ def main(args):
         D = MADEval_Dataset
         video_type = "movie"
         args.num_workers = 8
+    elif args.dataset == "swissAD":
+        D = SwissAD_Dataset
+        video_type = "movie"
     else:
         print("Check dataset name")
         sys.exit()

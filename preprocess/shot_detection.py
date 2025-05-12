@@ -174,6 +174,31 @@ if __name__ == '__main__':
         output_df.to_csv(save_path)
 
 
+    elif args.dataset == "swissAD":
+        anno_df = pd.read_csv(anno_path)
+        names = anno_df["movie_title"].unique().tolist()
+        imdbids = anno_df["imdbid"].unique().tolist()
+
+        video_paths = []
+        shot_lists = []
+        for name in tqdm(names, total=len(names)):
+            video_path = os.path.join(video_dir, name + '.mp4')
+            video_paths.append(video_path)
+
+            # Run shot detection function
+            shot_list = shot_detection(video_path)
+
+            # Add 20ms gap
+            gapped_shot_list = []
+            for shot_single in shot_list:
+                gapped_shot_list.append((shot_single[0] + 0.01, shot_single[1] - 0.01))
+            shot_lists.append(gapped_shot_list)
+
+        # Saving
+        output_df = pd.DataFrame.from_records({'video_path':video_paths, 'imdbid': imdbids, 'name':names, 'shot_list':shot_lists})
+        output_df.to_csv(save_path)
+
+
     else:
         print("Please specify dataset")
         sys.exit(0)

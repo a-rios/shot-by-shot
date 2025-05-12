@@ -19,14 +19,13 @@ from typing import List, Optional
 from argparse import ArgumentParser
 from torch.utils.data import Dataset, DataLoader
 
-sys.path.append("dinov2")
-from dinov2.eval.setup import get_args_parser as get_setup_args_parser
-from dinov2.eval.setup import setup_and_build_model
+sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), "dinov2_model"))
+
+from dinov2.eval import setup
 from dinov2.eval.utils import ModelWithIntermediateLayers
 
 from io import BytesIO
 from decord import VideoReader, cpu    
-
 
 
 # This is the default args parser in DINOv2, unchanged
@@ -35,7 +34,7 @@ def get_args_parser_dinov2(
     parents: Optional[List[argparse.ArgumentParser]] = [],
     add_help: bool = True,
     ):
-    setup_args_parser = get_setup_args_parser(parents=parents, add_help=False)
+    setup_args_parser = setup.get_args_parser(parents=parents, add_help=False)
     parents = [setup_args_parser]
     parser = argparse.ArgumentParser(
         description=description,
@@ -154,6 +153,11 @@ class ScaleDataset():
                     video_path = os.path.join(self.video_root, "bbt_frames", seg_name + ".tar")
                 start = row['scaled_index']  
                 end = None
+            elif self.dataset == "swissAD":
+                filename = row['movie_title']
+                video_path = os.path.join(args.video_dir, filename + ".mp4")
+                start = row['scaled_start']
+                end = row['scaled_end']
             self.samples.append((row_idx, row['anno_idx'], video_path, start, end))
 
         if self.dataset == "madeval": # to save time for madeval load
@@ -175,9 +179,9 @@ class ScaleDataset():
             else:
                 decord_vr = self.current_decord
             clip_image = extract_midframe_from_video(decord_vr, start = start, end = end)[0]  
-        elif self.dataset == "cmdad":
+        elif self.dataset == "cmdad" or self.dataset == "swissAD":
             decord_vr = VideoReader(uri=video_path, ctx=cpu(0)) 
-            clip_image = extract_midframe_from_video(decord_vr, start = start, end = end)[0]  
+            clip_image = extract_midframe_from_video(decord_vr, start = start, end = end)[0]
         
         # Crop the center 4(width):3(height) region of the image
         w_, h_ = clip_image.size
@@ -290,11 +294,20 @@ if __name__ == '__main__':
         sys.exit(0)
 
     # Load default DINOv2 models and parameters
-    args_parser_dinov2 = get_args_parser_dinov2()
-    args_dinov2 = args_parser_dinov2.parse_args()
-    args_dinov2.pretrained_weights = args.dinov2_ckpt_path
-    args_dinov2.config_file = args.dinov2_config_path
-    dinov2_model, autocast_dtype = setup_and_build_model(args_dinov2)
+    args_dinov2 = argparse.Namespace(
+        train_dataset_str="ImageNet:split=TRAIN",
+        val_dataset_str="ImageNet:split=VAL",
+        nb_knn=[10, 20, 100, 200],
+        temperature=0.07,
+        batch_size=256,
+        n_per_class_list=[-1],
+        n_tries=1,
+        config_file=args.dinov2_config_path,
+        pretrained_weights=args.dinov2_ckpt_path,
+        output_dir=os.path.join(os.path.dirname(os.path.abspath(__file__)), "dinov2_model/tmp"),
+        opts=[]
+    )
+    dinov2_model, autocast_dtype = setup.setup_and_build_model(args_dinov2)
 
     # Initialise shot scale classifer and load additional ckpts (for last 6 dinov2 layers and a linear layer)
     model = ScaleClassifier(dinov2_model, autocast_dtype).cuda()

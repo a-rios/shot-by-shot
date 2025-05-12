@@ -20,8 +20,9 @@ from decord import VideoReader, cpu
 from argparse import ArgumentParser
 pd.options.mode.chained_assignment = None  
 
-sys.path.append("dinov2")
-from extract_feature import DINOv2_feature_extractor
+
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+from dinov2_model.extract_feature import DINOv2_feature_extractor
 
 
 def extract_frame_from_tarfile(tar_path, img_idx):
@@ -93,7 +94,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     # Load DINOv2 model
-    model_type = "vitg14_reg4"    
+    model_type = "vitg14_reg4"
     model = DINOv2_feature_extractor(model_type, aspect_ratio=3/4)
 
     
@@ -145,6 +146,16 @@ if __name__ == "__main__":
                 image_end = extract_frame_from_tarfile(video_path, end_idx)
                 shot_images.append(image_start)
                 shot_images.append(image_end)
+        elif args.dataset == "swissAD":
+            filename = sub_df['movie_title'].iloc[0]
+            video_path = os.path.join(args.video_dir, filename + ".mp4")
+            if video_path != last_video:
+                decord_vr = VideoReader(uri=video_path, ctx=cpu(0))
+                last_video = video_path
+            shot_images = []
+            for idx, row in sub_df.iterrows():
+                images = extract_sideframes_from_video(decord_vr, start = row['scaled_start'], end = row['scaled_end'])
+                shot_images.extend(images)
 
         if len(sub_df) == 1: # only one shot
             clusters = [[0]]

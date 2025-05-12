@@ -17,6 +17,8 @@ import ipdb
 import torch
 from torch.nn.functional import one_hot, softmax
 
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+
 import dinov2.distributed as distributed
 from dinov2.data import SamplerType, make_data_loader, make_dataset
 from dinov2.data.transforms import make_classification_eval_transform
@@ -100,13 +102,13 @@ def get_args_parser(
 def dynamic_aspect_ratio_crop(img):
     # Get the original dimensions of the image
     width, height = img.size
-    
+
     # Set aspect ratio based on image orientation
     if width > height:
         aspect_ratio = 4 / 3  # For landscape images
     else:
         aspect_ratio = 3 / 4  # For portrait images
-    
+
     # Calculate the new crop dimensions
     if width / height > aspect_ratio:
         # Crop width to match the desired aspect ratio
@@ -116,47 +118,48 @@ def dynamic_aspect_ratio_crop(img):
         # Crop height to match the desired aspect ratio
         new_width = width
         new_height = int(width / aspect_ratio)
-    
+
     # Center crop the image
     left = (width - new_width) // 2
     top = (height - new_height) // 2
     right = left + new_width
     bottom = top + new_height
-    
+
     # Perform the crop
     return img.crop((left, top, right, bottom))
 
 class DINOv2_feature_extractor():
     def __init__(self, model_type, aspect_ratio):
+        pwd = os.path.dirname(os.path.abspath(__file__))
         if model_type == "vitb14":
             pretrained_weights = "https://dl.fbaipublicfiles.com/dinov2/dinov2_vitb14/dinov2_vitb14_pretrain.pth"
-            config_file = "dinov2/dinov2/configs/eval/vitb14_pretrain.yaml"
+            config_file = os.path.join(pwd, "dinov2/configs/eval/vitb14_pretrain.yaml")
         elif model_type == "vitl14_reg4":
             pretrained_weights = "https://dl.fbaipublicfiles.com/dinov2/dinov2_vitl14/dinov2_vitl14_reg4_pretrain.pth"
-            config_file = "dinov2/dinov2/configs/eval/vitl14_reg4_pretrain.yaml"
+            config_file = os.path.join(pwd, "dinov2/configs/eval/vitl14_reg4_pretrain.yaml")
         elif model_type == "vitg14_reg4":
             pretrained_weights = "https://dl.fbaipublicfiles.com/dinov2/dinov2_vitg14/dinov2_vitg14_reg4_pretrain.pth"
-            config_file = "dinov2/dinov2/configs/eval/vitg14_reg4_pretrain.yaml"
+            config_file = os.path.join(pwd, "dinov2/configs/eval/vitg14_reg4_pretrain.yaml")
 
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.model = self.building_dino_v2(pretrained_weights, config_file).to(self.device)
         self.model.eval()
-        
+
 
         self.transform = transforms.Compose([
             transforms.Lambda(lambda img: dynamic_aspect_ratio_crop(img)),  # Central crop based on dynamic aspect ratio
             transforms.Lambda(lambda img: img.resize(
-                (int(224 * aspect_ratio), 224) if img.width < img.height else (224, int(224 * aspect_ratio)), 
+                (int(224 * aspect_ratio), 224) if img.width < img.height else (224, int(224 * aspect_ratio)),
                 Image.BICUBIC)
-            ), 
+            ),
             transforms.ToTensor(),
             transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
         ])
 
-        
+
     def building_dino_v2(self, pretrained_weights, config_file):
         args_parser_new = get_args_parser()
-        args_new = args_parser_new.parse_args()
+        args_new = args_parser_new.parse_args([])
         args_new.pretrained_weights = pretrained_weights
         args_new.config_file = config_file
         model, autocast_dtype = setup_and_build_model(args_new)
@@ -186,11 +189,10 @@ class DINOv2_feature_extractor():
         return concat_feats
 
 
-    
+
 
 
 if __name__ == "__main__":
     description = "DINOv2 feature extractor"
     args_parser = get_args_parser(description=description)
     args = args_parser.parse_args()
-

@@ -68,7 +68,7 @@ class PromptLoader():
                 "3. Describe the interactions between characters, such as looking;\n"
                 "4. Describe the facial expressions of characters.\n"
                 f"{thread_text}"
-                "Note, colored {label_type} are provided for character indications only, DO NOT mention them in the description. "   
+                "Note, colored {label_type} are provided for character indications only, DO NOT mention them in the description. "
                 "Make sure you do not hallucinate information.\n"
                 f"{template}"
             ) 
@@ -100,7 +100,7 @@ class PromptLoader():
                 "4. Describe the environment, focusing on the location, furniture, entrances and exits, etc.\n"
                 f"{thread_text}"
                 "Note, colored {label_type} are provided for character indications only, DO NOT mention them in the description. "
-                "Make sure you do not hallucinate information.\n"   
+                "Make sure you do not hallucinate information.\n"
                 f"{template}"
             ) 
             general_prompt = general_prompt.format(video_type=self.video_type, char_text=char_text, label_type=self.label_type)

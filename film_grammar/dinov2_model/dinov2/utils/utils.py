@@ -12,14 +12,16 @@ from urllib.parse import urlparse
 import numpy as np
 import torch
 from torch import nn
-
+from pathlib import Path
 
 logger = logging.getLogger("dinov2")
+dino_model_dir=Path(__file__).resolve().parents[2]
+
 
 
 def load_pretrained_weights(model, pretrained_weights, checkpoint_key):
     if urlparse(pretrained_weights).scheme:  # If it looks like an URL
-        state_dict = torch.hub.load_state_dict_from_url(pretrained_weights, map_location="cpu")
+        state_dict = torch.hub.load_state_dict_from_url(pretrained_weights, map_location="cpu", model_dir=dino_model_dir)
     else:
         state_dict = torch.load(pretrained_weights, map_location="cpu")
     if checkpoint_key is not None and checkpoint_key in state_dict:
