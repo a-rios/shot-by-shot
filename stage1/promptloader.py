@@ -63,7 +63,7 @@ class PromptLoader():
             general_prompt = (
                 "Please watch the following {video_type} clip, where different shot numbers are labelled on the top-left of each frame.\n"
                 f"Please briefly describe what happened in {current_shot_text} in the four steps below:\n"
-                "1. Identify main characters (if {label_type} are available){char_text};\n"
+                "1. Name the main characters (if {label_type} are available){char_text}. Also describe their appearance (hair color, beard, young, old);\n"
                 "2. Describe the actions of characters, i.e., who is doing what, focusing on the movements;\n" 
                 "3. Describe the interactions between characters, such as looking;\n"
                 "4. Describe the facial expressions of characters.\n"
@@ -94,7 +94,7 @@ class PromptLoader():
             general_prompt = (
                 "Please watch the following {video_type} clip, where different shot numbers are labelled on the top-left of each frame.\n"
                 f"Please briefly describe what happened in {current_shot_text} in the four steps below:\n"
-                "1. Identify main characters (if {label_type} are available){char_text};\n"
+                "1. Identify main characters (if {label_type} are available){char_text}; Describe their appearance (hair color, beard, young, old);\n"
                 "2. Describe the actions of characters, i.e., who is doing what, focusing on the movements;\n" 
                 "3. Describe the interactions between characters, such as looking;\n"
                 "4. Describe the environment, focusing on the location, furniture, entrances and exits, etc.\n"
@@ -126,7 +126,7 @@ class PromptLoader():
             general_prompt = (
                 "Please watch the following {video_type} clip, where different shot numbers are labelled on the top-left of each frame.\n"
                 f"Please briefly describe what happened in {current_shot_text} in the four steps below:\n"
-                "1. Identify main characters (if {label_type} are available){char_text};\n"
+                "1. Identify main characters (if {label_type} are available){char_text}; Describe their appearance (hair color, beard, young, old);\n"
                 "2. Describe the actions of characters, i.e., who is doing what, focusing on the movements;\n" 
                 "3. Describe the interactions between characters, such as looking;\n"
                 "4. Describe the key objects that characters interact with.\n"
@@ -158,7 +158,7 @@ class PromptLoader():
             general_prompt = (
                 "Please watch the following {video_type} clip, where different shot numbers are labelled on the top-left of each frame.\n"
                 f"Please briefly describe what happened in {current_shot_text} in the three steps below:\n"
-                "1. Identify main characters (if {label_type} are available){char_text};\n"
+                "1. Identify main characters (if {label_type} are available){char_text}; Describe their appearance (hair color, beard, young, old);\n"
                 "2. Describe the actions of characters, i.e., who is doing what, focusing on the movements;\n"
                 "3. Describe the interactions between characters, such as looking.\n"
                 f"{thread_text}"

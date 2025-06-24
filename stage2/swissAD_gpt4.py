@@ -47,7 +47,7 @@ def summary_each(client, user_prompt, dataset, idx, mode):
 
     sys_prompt = (
             f"You are an intelligent chatbot designed for summarizing {dataset_text} audio descriptions. "
-            "Here's how you can accomplish the task:------##INSTRUCTIONS: you should convert the predicted descriptions into one sentence. "
+            "Here's how you can accomplish the task: INSTRUCTIONS: you should convert the predicted descriptions into one sentence. "
             "You should directly start the answer with the converted results WITHOUT providing ANY more sentences at the beginning or at the end."
     )
 
@@ -105,6 +105,7 @@ def main(args):
     end_sec_list = []
     imdbid_list = []
     anno_indices = []
+    preceding_ad = ""
     for row_idx, row in tqdm(pred_df.iterrows(), total=len(pred_df)):
         # Estimate the number of words based on training split statistics
         duration = round(row['end'] - row['start'], 2)
@@ -121,10 +122,8 @@ def main(args):
         sampled_indices = random.choices(candid_indices, k=args.num_examples)
         sampled_examples = [all_gts_wo_char[index] for index in sampled_indices]
 
-        examples = get_samples(args.language)
-
         # Formulate the user prompt
-        user_prompt = get_user_prompt(mode=args.mode, prompt_idx=args.prompt_idx, verb_list=[], text_pred=text_pred, word_limit=int(rough_num_words)+1, examples=examples)
+        user_prompt = get_user_prompt(mode=args.mode, prompt_idx=args.prompt_idx, verb_list=[], text_pred=text_pred, word_limit=int(rough_num_words)+1, examples=sampled_examples, language=args.language, preceding_ad=preceding_ad)
 
         # Output AD
         text_summary = summary_each(client, user_prompt, args.dataset, row_idx, args.mode)
@@ -148,7 +147,8 @@ def main(args):
         except:
             output_ads = ""
 
-        print(output_ads)
+        print("-------- ", output_ads)
+        preceding_ad = output_ads
         text_gen_list.append(output_ads)
         text_gt_list.append(text_gt)
         start_sec_list.append(row['start'])

@@ -13,7 +13,7 @@ from promptloader import get_user_prompt
 
 
 def initialise_model(access_token):
-    model_id = "meta-llama/Meta-Llama-3-8B-Instruct"
+    model_id = "meta-llama/Llama-3.1-8B-Instruct"
     pipeline = transformers.pipeline(
         "text-generation",
         model=model_id,
@@ -28,7 +28,7 @@ def summary_each(pipeline, user_prompt, dataset):
 
     sys_prompt = (
             "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n"
-            "You are an intelligent chatbot designed for summarizing audio descriptions."
+            f"You are an intelligent chatbot designed for summarizing {dataset_text} audio descriptions."
             "Here's how you accomplish the task: convert the predicted descriptions into one sentence. "
             "Directly start the answer with the converted results WITHOUT providing ANY more sentences at the beginning or at the end.\n"
     )
@@ -75,6 +75,7 @@ def main(args):
     end_sec_list = []
     imdbid_list = []
     anno_indices = []
+    preceding_ad = ""
     for row_idx, row in tqdm(pred_df.iterrows(), total=len(pred_df)):
         # Estimate the number of words based on training split statistics
         duration = round(row['end'] - row['start'], 2)
@@ -92,13 +93,15 @@ def main(args):
         sampled_examples = [all_gts_wo_char[index] for index in sampled_indices]
 
         # Formulate the user prompt
-        user_prompt = get_user_prompt(mode=args.mode, prompt_idx=args.prompt_idx, verb_list=None, text_pred=text_pred, word_limit=int(rough_num_words)+1, examples=sampled_examples, language=args.language)
+        user_prompt = get_user_prompt(mode=args.mode, prompt_idx=args.prompt_idx, verb_list=None, text_pred=text_pred, word_limit=int(rough_num_words)+1, examples=sampled_examples, language=args.language, preceding_ad=preceding_ad)
 
         # format change, need to preprend user header to user prompt and append role header at the end
         user_prompt = "<|eot_id|><|start_header_id|>user<|end_header_id|>\n" + user_prompt + "\n<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n"
+        print(user_prompt)
         
         # Output AD
         text_summary = summary_each(pipeline, user_prompt, args.dataset)
+
         try:
             if args.mode == "single": # default single AD mode
                 text_summary = text_summary.replace("{\"summarized_AD\": \"", "").replace("\"}", "").strip()
@@ -117,6 +120,7 @@ def main(args):
             output_ads = ""
 
         print(output_ads)
+        preceding_ad = output_ads
         text_gen_list.append(output_ads)
         text_gt_list.append(text_gt)
         start_sec_list.append(row['start'])
