@@ -11,14 +11,16 @@ from tqdm import tqdm
 
 from promptloader import PromptLoader
 from dataloader import CMDAD_Dataset, TVAD_Dataset, MADEval_Dataset, SwissAD_Dataset
-from transformers import Qwen2VLForConditionalGeneration, AutoTokenizer, AutoProcessor
+from transformers import Qwen2_5_VLForConditionalGeneration, AutoTokenizer, AutoProcessor
 
+# Qwen/Qwen2.5-VL-7B-Instruct
+# Qwen/Qwen2-VL-7B-Instruct
 
 def main(args):
     # Load model
-    processor = AutoProcessor.from_pretrained("Qwen/Qwen2-VL-7B-Instruct")
-    model = Qwen2VLForConditionalGeneration.from_pretrained(
-        "Qwen/Qwen2-VL-7B-Instruct", torch_dtype=torch.bfloat16, device_map="auto",
+    processor = AutoProcessor.from_pretrained("Qwen/Qwen2.5-VL-7B-Instruct")
+    model = Qwen2_5_VLForConditionalGeneration.from_pretrained(
+        "Qwen/Qwen2.5-VL-7B-Instruct", torch_dtype=torch.bfloat16, device_map="auto",
       attn_implementation="flash_attention_2"
     )
     

@@ -147,7 +147,7 @@ def main(args):
         except:
             output_ads = ""
 
-        print("-------- ", output_ads)
+        print(output_ads)
         preceding_ad = output_ads
         text_gen_list.append(output_ads)
         text_gt_list.append(text_gt)
