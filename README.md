@@ -1,3 +1,21 @@
+# Adaptions for German/Italian movies:
+
+Modifications in this fork:
+<ul>
+	<li>changed stage 2 prompting to reflect SWISS TXT guidelines</li>
+	<li>added character recognition module from <a href="https://github.com/Jyxarthur/AutoAD-Zero">AutoAD Zero</a></li>
+	<li>changed models: 
+	<ul>
+		<li>stage 1: <a href="https://huggingface.co/Qwen/Qwen2.5-VL-7B-Instruct">qwen2.5-vl</a> instead of qwen2-vl</li>
+		<li>stage 2: <a href="https://huggingface.co/Qwen/Qwen3-14B">qwen3</a> instead of Llama3</li>	
+  	</ul>
+	</li>
+</ul>
+For more information, see original README below.
+
+---
+
+
 # Shot🎞️-by-Shot🎞️: Film-Grammar-Aware Training-Free Audio Description Generation
 
 Junyu Xie<sup>1</sup>, Tengda Han<sup>1</sup>, Max Bain<sup>1</sup>, Arsha Nagrani<sup>1</sup>, Eshika Khandelwal<sup>2</sup> <sup>3</sup>, Gül Varol<sup>1</sup> <sup>3</sup>, Weidi Xie<sup>1</sup> <sup>4</sup>, Andrew Zisserman<sup>1</sup>
